@@ -1,27 +1,38 @@
-const express=require('express');
+const express = require('express');
+const cookieParser = require('cookie-parser');
+const connectDB = require("./config/database");
+const app = express();
+const cors=require("cors");
 
-const app=express();
+app.use(cors({
+  origin:"http://localhost:5173",
+  credentials:true,
+}));
+app.use(express.json());
+app.use(cookieParser());
 
-app.get("/user",(req,res)=>{
-    res.send({firstName:"Jitesh",lastName:"Jadhav"});
-})
-app.post("/user",(req,res)=>{
-    res.send("Data saved succesfully!")
-})
-app.delete("/user",(req,res)=>{
-    res.send("Data deleted from the database!!");
-})
-//app.use("/hello", (req,res)=>{
-//     res.send("Hello how you doin!");
-// });
 
-// app.use("/test",(req,res)=>{
-//     res.send("Welcome to Namaste NodeJs!!");
-// });
+const authRouter=require("./routes/auth");
+const profileRouter=require("./routes/profile");
+const requestRouter=require("./routes/request");
+const userRouter = require('./routes/user');
 
-// app.use("/",(req,res)=>{
-//     res.send("Hello from the homepage");
-// });
-app.listen(7777, ()=>{
-    console.log("Server is listening");
-});
+
+ app.use("/",authRouter);
+ app.use("/",profileRouter);
+ app.use("/",requestRouter);
+ app.use("/",userRouter);
+   
+  app.use("/",(req,res)=>{
+    res.send("Welcome to homepage");
+ })
+connectDB()
+  .then(() => {
+    console.log("database connection established...");
+    app.listen(7777, () => {
+      console.log("Server is successfully listening on port 7777");
+    });
+  })
+  .catch((err) => {
+    console.error("database cannot be connected");
+  });
